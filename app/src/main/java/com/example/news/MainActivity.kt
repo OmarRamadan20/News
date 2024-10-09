@@ -5,7 +5,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.news.NewsSource.NewsSourceFragment
 import com.example.news.cateogries.CategoryFragment
 import com.example.news.databinding.ActivityMainBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     lateinit var viewBinding:ActivityMainBinding
     lateinit var categoriesFragment: CategoryFragment

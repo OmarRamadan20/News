@@ -1,8 +1,9 @@
-package com.example.news.api.sourceResponse
+package com.example.data.api.sourceResponse
 
+import com.example.domain.model.Source
 import com.google.gson.annotations.SerializedName
 
-data class Source(
+data class SourceDto(
 
 	@field:SerializedName("country")
 	val country: String? = null,
@@ -24,4 +25,8 @@ data class Source(
 
 	@field:SerializedName("url")
 	val url: String? = null
-)
+){
+	fun toSource():Source{
+		return Source(country, name, description, language, id, category, url)
+	}
+}

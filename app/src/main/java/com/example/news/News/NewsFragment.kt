@@ -6,23 +6,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModel
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
+import com.example.domain.model.ArticleItem
+import com.example.domain.model.Source
 import com.example.news.ViewMessage
-import com.example.news.api.ApiManager
-import com.example.news.api.newsResponse.ArticlesItem
-import com.example.news.api.newsResponse.NewsResponse
-import com.example.news.api.sourceResponse.Source
-import com.example.news.api.sourceResponse.SourcesResponse
 import com.example.news.databinding.FragmentNewsBinding
-import com.google.gson.Gson
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class NewsFragment : Fragment() {
     lateinit var viewBinding: FragmentNewsBinding
-    var viewModel = NewsViewModel()
+    private val viewModel: NewsViewModel by viewModels()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -36,7 +31,7 @@ class NewsFragment : Fragment() {
 
 
     var adapter = NewsAdapter(null)
-    private fun showNewsList(articles: List<ArticlesItem?>?) {
+    private fun showNewsList(articles: List<ArticleItem?>?) {
         adapter.changeData(articles)
     }
 
@@ -76,11 +71,5 @@ class NewsFragment : Fragment() {
     fun changeSource(source: Source) {
         this.source = source
         viewModel.loadNews(source)
-    }
-
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(this)[NewsViewModel::class.java]
     }
 }

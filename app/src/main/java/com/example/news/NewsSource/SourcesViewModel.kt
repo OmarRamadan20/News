@@ -3,16 +3,20 @@ package com.example.news.NewsSource
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.data.api.sourceResponse.SourcesResponse
+import com.example.domain.contract.repository.newsSourceRepo.NewsSourceRepository
 import com.example.news.ViewMessage
-import com.example.news.api.ApiManager
-import com.example.news.api.sourceResponse.Source
-import com.example.news.api.sourceResponse.SourcesResponse
+import com.example.domain.model.Source
 import com.google.gson.Gson
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import javax.inject.Inject
 
-class SourcesViewModel:ViewModel() {
+@HiltViewModel
+class SourcesViewModel @Inject constructor
+    (private val newsSourceRepository: NewsSourceRepository):ViewModel() {
 
     val isVisibleLiveData = MutableLiveData<Boolean>()
     val sourcesListLiveData = MutableLiveData<List<Source?>?>()
@@ -21,8 +25,8 @@ class SourcesViewModel:ViewModel() {
         isVisibleLiveData.value = true
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val response = ApiManager.getService().getNewsSources(category = categoryId)
-                sourcesListLiveData.postValue(response.sources)
+                val response = newsSourceRepository.getNewsSources(category = categoryId)
+                sourcesListLiveData.postValue(response)
 
             } catch (e: HttpException) {
                 val responseJson = e.response()?.errorBody()?.string()
