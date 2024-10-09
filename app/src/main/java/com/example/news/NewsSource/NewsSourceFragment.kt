@@ -4,26 +4,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.news.News.NewsFragment
 import com.example.news.R
 import com.example.news.ViewMessage
-import com.example.news.api.ApiManager
 import com.example.news.api.sourceResponse.Source
-import com.example.news.api.sourceResponse.SourcesResponse
 import com.example.news.databinding.FragmentNewsSourcesBinding
 import com.google.android.material.tabs.TabLayout
-import com.google.gson.Gson
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
-class NewsSourceFragment : Fragment() {
-    lateinit var binding: FragmentNewsSourcesBinding
-    var viewModel = SourcesViewModel()
-
+class NewsSourceFragment(private val cateogryId:String) : Fragment() {
+    private lateinit var binding: FragmentNewsSourcesBinding
+    private lateinit var viewModel: SourcesViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,14 +31,16 @@ class NewsSourceFragment : Fragment() {
     ): View {
         binding = FragmentNewsSourcesBinding.inflate(inflater, container, false)
         return binding.root
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViews()
         observeLiveData()
-        viewModel.getNewsSources()
+        viewModel.getNewsSources(cateogryId)
     }
+
 
     private fun observeLiveData() {
         viewModel.isVisibleLiveData.observe(viewLifecycleOwner) {
@@ -70,11 +66,11 @@ class NewsSourceFragment : Fragment() {
 
         binding.errorButton.setOnClickListener {
             binding.errorView.isVisible = true
-            viewModel.getNewsSources()
+            viewModel.getNewsSources(cateogryId)
         }
     }
 
-    fun changeLoadingVisibility(isLoadingVisible: Boolean) {
+    private fun changeLoadingVisibility(isLoadingVisible: Boolean) {
         binding.progressBar.isVisible = isLoadingVisible
     }
 
@@ -108,9 +104,9 @@ class NewsSourceFragment : Fragment() {
         binding.errorView.isVisible = true
         binding.errorMessage.text = message?.message
         binding.errorButton.text = message?.posActionName
-        binding.errorButton.setOnClickListener({
+        binding.errorButton.setOnClickListener{
             message?.posAction?.invoke()
-        })
+        }
 
     }
 

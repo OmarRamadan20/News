@@ -1,56 +1,48 @@
 package com.example.news.NewsSource
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.news.ViewMessage
 import com.example.news.api.ApiManager
 import com.example.news.api.sourceResponse.Source
 import com.example.news.api.sourceResponse.SourcesResponse
 import com.google.gson.Gson
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 class SourcesViewModel:ViewModel() {
 
     val isVisibleLiveData = MutableLiveData<Boolean>()
     val sourcesListLiveData = MutableLiveData<List<Source?>?>()
     val message = MutableLiveData<ViewMessage>()
-     fun getNewsSources() {
-        isVisibleLiveData.value=true
-        ApiManager.getService()
-            .getNewsSources()
-            .enqueue(object : Callback<SourcesResponse> {
-                override fun onResponse(
-                    call: Call<SourcesResponse>,
-                    response: Response<SourcesResponse>
-                ) {
-                    isVisibleLiveData.value=false
-                    if (response.isSuccessful) {
-                        sourcesListLiveData.value=response.body()?.sources
-                    } else {
-                        val responseJson = response.errorBody()?.string()
-                        val errorResponse =
-                            Gson().fromJson(responseJson, SourcesResponse::class.java)
-                        message.value=(ViewMessage(
-                            message = errorResponse.message?:"Something Went wrong",
-                            posActionName = "Try Again",
-                            posAction = {getNewsSources()}
-                        ))                    }
-                }
+    fun getNewsSources(categoryId: String) {
+        isVisibleLiveData.value = true
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val response = ApiManager.getService().getNewsSources(category = categoryId)
+                sourcesListLiveData.postValue(response.sources)
 
-                override fun onFailure(call: Call<SourcesResponse>, t: Throwable) {
-                    isVisibleLiveData.value=true
-                    message.value=(ViewMessage(
-                        message =t.message?:"Something Went wrong",
-                        posActionName = "Try Again",
-                        posAction = {getNewsSources()}
-                    ))
+            } catch (e: HttpException) {
+                val responseJson = e.response()?.errorBody()?.string()
+                val errorResponse =
+                    Gson().fromJson(responseJson, SourcesResponse::class.java)
+                message.postValue ((ViewMessage(
+                    message = errorResponse.message ?: "Something Went wrong",
+                    posActionName = "Try Again",
+                    posAction = { getNewsSources(categoryId) }
+                )))
+            } catch (e: Exception) {
+                message.postValue((ViewMessage(
+                    message = e.message ?: "Something Went wrong")))
+            }
+            finally {
+                isVisibleLiveData.postValue(false)
 
-                }
-
-            })
+            }
+        }
     }
-
 }
+
+

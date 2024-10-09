@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">News</string>
     <string name="try_again">Try Again</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="pick_your_category_of_interest">Pick your category of interest</string>
 </resources>
